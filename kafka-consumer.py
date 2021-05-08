@@ -12,8 +12,10 @@ DATASET = '{}.{}'.format(client.project, ds)
 def query_builder(columns, values):
     wheres = []
     for i in range(len(columns)):
-        wheres.append(f'{columns[i]} = {values[i]}')
-
+        if isinstance(values[i], str):
+            wheres.append(f'{columns[i]} = "{values[i]}"')
+        else:
+            wheres.append(f'{columns[i]} = {values[i]}')
     return " and ".join(wheres)
 
 
@@ -113,9 +115,11 @@ for msg in consumer:
                 VALUES{value_builder(activity['col_values'])}
                 """
 
-                print(query)
                 query_job = client.query(query)  # API request
                 query_job.result()  # Waits for statement to finish
+
+                print(
+                    f"Row with {query_builder(activity['col_names'], activity['col_values'])} added.")
 
         elif activity['operation'] == 'delete':
             if activity['table'] not in bq_table_name:
@@ -128,4 +132,6 @@ for msg in consumer:
                 """
 
                 query_job = client.query(query)  # API request
-                print(query_job.result())  # Waits for statement to finish
+                query_job.result()  # Waits for statement to finish
+                print(
+                    f"Row with {query_builder(activity['col_names'], activity['col_values'])} deleted.")

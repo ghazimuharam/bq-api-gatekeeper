@@ -1,3 +1,5 @@
 fastapi
 uvicorn[standard]
 kafka-python
+pydantic
+google-cloud-bigquery
